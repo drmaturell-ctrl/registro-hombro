@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Registro Hombro">
+<title>Registro Hombro</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0f1a; color: #e2e8f0; min-height: 100vh; }
+  .mono { font-family: 'Courier New', monospace; }
+
+  /* Header */
+  .header { background: #0f1623; border-bottom: 1px solid #1e293b; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700; color: #38bdf8; letter-spacing: 0.1em; }
+  .sync-status { font-size: 11px; }
+  .sync-ok { color: #4ade80; }
+  .sync-warn { color: #f59e0b; }
+
+  /* Content */
+  .content { padding: 20px 16px; max-width: 600px; margin: 0 auto; padding-bottom: 60px; }
+
+  /* Cards */
+  .card { background: #0f1623; border: 1px solid #1e293b; border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  .section-title { font-family: 'Courier New', monospace; font-size: 11px; color: #38bdf8; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
+
+  /* Inputs */
+  .field { margin-bottom: 18px; }
+  .field label { font-family: 'Courier New', monospace; font-size: 11px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 8px; }
+  .field input, .field textarea, .field select {
+    background: #1e293b; border: 2px solid #334155; border-radius: 10px;
+    color: #f1f5f9; padding: 14px 16px; font-size: 16px;
+    width: 100%; font-family: -apple-system, sans-serif;
+    -webkit-appearance: none; appearance: none; outline: none;
+  }
+  .field textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+  .field input:focus, .field textarea:focus { border-color: #0369a1; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Chips */
+  .chip-label { font-family: 'Courier New', monospace; font-size: 11px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .chip { background: #1e293b; color: #94a3b8; border: 2px solid #334155; border-radius: 20px; padding: 8px 16px; font-size: 14px; cursor: pointer; font-family: -apple-system, sans-serif; transition: all 0.15s; -webkit-appearance: none; }
+  .chip.active { background: #0369a1; color: #fff; border-color: #0284c7; }
+  .chip:active { opacity: 0.8; }
+
+  /* Diagnosis list */
+  .dx-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+  .dx-item { background: #1e293b; color: #94a3b8; border: 2px solid #334155; border-radius: 10px; padding: 12px 16px; font-size: 14px; text-align: left; cursor: pointer; font-family: -apple-system, sans-serif; -webkit-appearance: none; width: 100%; }
+  .dx-item.active { background: #0c4a6e; color: #38bdf8; border-color: #0369a1; }
+
+  /* Buttons */
+  .btn-primary { background: #0369a1; color: #fff; border: none; border-radius: 10px; padding: 13px 22px; font-size: 15px; cursor: pointer; font-family: -apple-system, sans-serif; -webkit-appearance: none; }
+  .btn-ghost { background: transparent; color: #64748b; border: 2px solid #1e293b; border-radius: 10px; padding: 13px 22px; font-size: 15px; cursor: pointer; font-family: -apple-system, sans-serif; }
+  .btn-success { background: #166534; color: #86efac; border: none; border-radius: 10px; padding: 13px 22px; font-size: 15px; cursor: pointer; font-family: -apple-system, sans-serif; }
+  .btn-danger { background: #7f1d1d; color: #fca5a5; border: none; border-radius: 10px; padding: 13px; font-size: 14px; cursor: pointer; width: 100%; font-family: -apple-system, sans-serif; margin-bottom: 16px; }
+  .btn-full { width: 100%; font-size: 17px; padding: 16px; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn-ghost, .btn-row .btn-primary { flex: 1; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: #0f1623; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; color: #38bdf8; }
+  .stat-label { font-family: 'Courier New', monospace; font-size: 10px; color: #64748b; text-transform: uppercase; }
+
+  /* Case rows */
+  .case-row { background: #0f1623; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 10px; cursor: pointer; }
+  .case-row:active { border-color: #0369a1; }
+  .case-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .case-name { font-weight: 700; color: #f1f5f9; font-size: 16px; }
+  .tag { display: inline-block; border-radius: 20px; padding: 3px 10px; font-size: 11px; margin-left: 4px; }
+  .tag-blue { background: #0c4a6e44; color: #38bdf8; border: 1px solid #0c4a6e; }
+  .tag-yellow { background: #78350f44; color: #f59e0b; border: 1px solid #78350f; }
+  .tag-purple { background: #4c1d9544; color: #a78bfa; border: 1px solid #4c1d95; }
+  .tag-green { background: #14532d44; color: #4ade80; border: 1px solid #14532d; }
+
+  /* USG */
+  .usg-card { background: #0f1623; border: 1px solid #0369a1; border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  .usg-step { background: #0a0f1a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .usg-step-label { font-family: 'Courier New', monospace; font-size: 11px; color: #0284c7; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .usg-step-text { font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+  .pat-row { background: #1a0808; border: 1px solid #7f1d1d44; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; font-size: 13px; color: #fca5a5; }
+  .tip-box { background: #071a0e; border: 1px solid #166534; border-radius: 10px; padding: 14px; }
+  .tip-label { font-family: 'Courier New', monospace; font-size: 10px; color: #4ade80; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .tip-text { font-size: 14px; color: #86efac; line-height: 1.6; }
+  .usg-nav-nums { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .usg-num { background: #1e293b; color: #64748b; border: 2px solid #334155; border-radius: 20px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+  .usg-num.active { background: #0369a1; color: #fff; border-color: #0284c7; }
+
+  /* Views */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Home title */
+  .home-title { font-size: 24px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+  .home-sub { font-size: 13px; color: #475569; margin-bottom: 24px; }
+
+  /* Empty state */
+  .empty { text-align: center; color: #475569; padding: 40px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="view-home" class="view active">
+  <div class="header">
+    <span class="logo mono">⬡ SHOULDER</span>
+    <span id="home-sync" class="sync-status sync-ok"></span>
+  </div>
+  <div class="content">
+    <div class="home-title">Panel de hombro</div>
+    <div class="home-sub">Registro clínico de patología</div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-qx">0</div><div class="stat-label">Quirúrgico</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-cons">0</div><div class="stat-label">Conservador</div></div>
+    </div>
+    <button class="btn-primary btn-full" onclick="newCase()" style="margin-bottom:10px">+ Nuevo caso</button>
+    <div class="btn-row" style="margin-bottom:28px">
+      <button class="btn-ghost" onclick="showView('list')">Ver casos</button>
+      <button class="btn-ghost" style="color:#38bdf8;border-color:#0369a1" onclick="showView('usg')">Protocolo USG</button>
+    </div>
+    <div id="recent-cases"></div>
+  </div>
+</div>
+
+<!-- NEW / EDIT -->
+<div id="view-form" class="view">
+  <div class="header">
+    <button class="btn-ghost" style="padding:8px 14px;font-size:13px" onclick="showView('home')">← Atrás</button>
+    <span class="logo mono" id="form-title">Nuevo caso</span>
+    <button id="save-btn" class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="saveCase()">Guardar</button>
+  </div>
+  <div class="content">
+
+    <div class="card">
+      <div class="section-title">Paciente</div>
+      <div class="field"><label>Iniciales</label><input id="f-iniciales" type="text" placeholder="Ej: J.R.M." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></div>
+      <div class="grid2">
+        <div class="field"><label>Edad (años)</label><input id="f-edad" type="number" placeholder="años"></div>
+        <div class="field"><label>Fecha</label><input id="f-fecha" type="date"></div>
+      </div>
+      <span class="chip-label">Sexo</span>
+      <div class="chips" id="chips-sexo"></div>
+      <span class="chip-label">Lado afectado</span>
+      <div class="chips" id="chips-lado"></div>
+      <span class="chip-label">Dominancia</span>
+      <div class="chips" id="chips-dominancia"></div>
+      <div class="field"><label>Ocupación</label><input id="f-ocupacion" type="text" placeholder="Ej: agricultor, oficinista..." autocorrect="off" spellcheck="false"></div>
+      <div class="field"><label>Tiempo de evolución</label><input id="f-evolucion" type="text" placeholder="Ej: 3 meses, 2 años..." autocorrect="off"></div>
+      <div class="field"><label>Historia clínica / motivo de consulta</label><textarea id="f-mecanismo" placeholder="Describe el inicio, evolución y síntomas..."></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Scores funcionales</div>
+      <div class="grid2">
+        <div class="field"><label>DASH (0=mejor, 100=peor)</label><input id="f-dash" type="number" min="0" max="100" placeholder="0–100"></div>
+        <div class="field"><label>ASES (0=peor, 100=mejor)</label><input id="f-ases" type="number" min="0" max="100" placeholder="0–100"></div>
+        <div class="field"><label>Constant (0=peor, 100=mejor)</label><input id="f-constant" type="number" min="0" max="100" placeholder="0–100"></div>
+        <div class="field"><label>EVA dolor (0=sin, 10=máx)</label><input id="f-eva" type="number" min="0" max="10" placeholder="0–10"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Tests clínicos positivos</div>
+      <div class="chips" id="chips-tests"></div>
+      <div id="tests-notas-wrap" style="display:none">
+        <div class="field"><label>Notas sobre tests</label><textarea id="f-tests-notas" placeholder="Observaciones adicionales..."></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Ultrasonido</div>
+      <span class="chip-label">¿Realizó USG?</span>
+      <div class="chips" id="chips-usg-realizado"></div>
+      <div id="usg-detail" style="display:none">
+        <span class="chip-label">Equipo</span>
+        <div class="chips" id="chips-usg-equipo"></div>
+        <span class="chip-label">Estructuras evaluadas</span>
+        <div class="chips" id="chips-usg-estructuras"></div>
+        <div class="field"><label>Hallazgos USG</label><textarea id="f-usg-hallazgos" placeholder="Describe hallazgos, mediciones, lateralidad..."></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Imágenes</div>
+      <span class="chip-label">Estudios disponibles</span>
+      <div class="chips" id="chips-imagen"></div>
+      <div class="field"><label>Notas de imagen</label><textarea id="f-imagen-notas" placeholder="Hallazgos relevantes de RX o MRI..."></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Diagnóstico</div>
+      <div class="dx-list" id="dx-list"></div>
+      <div id="dx-libre-wrap" style="display:none">
+        <div class="field"><label>Especificar diagnóstico</label><input id="f-dx-libre" type="text" autocorrect="off"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Tratamiento</div>
+      <span class="chip-label">Tipo de tratamiento</span>
+      <div class="chips" id="chips-tratamiento"></div>
+      <div id="tecnica-wrap" style="display:none">
+        <div class="field"><label>Técnica / procedimiento</label><input id="f-tecnica" type="text" placeholder="Ej: reparación artroscópica manguito..." autocorrect="off"></div>
+      </div>
+      <div class="field"><label>Notas clínicas</label><textarea id="f-notas" placeholder="Observaciones, plan de seguimiento, hallazgos..."></textarea></div>
+      <span class="chip-label">Estado del caso</span>
+      <div class="chips" id="chips-estado"></div>
+    </div>
+
+    <div id="delete-btn-wrap" style="display:none">
+      <button class="btn-danger" onclick="deleteCurrentCase()">Eliminar caso</button>
+    </div>
+    <div style="height:40px"></div>
+  </div>
+</div>
+
+<!-- LIST -->
+<div id="view-list" class="view">
+  <div class="header">
+    <button class="btn-ghost" style="padding:8px 14px;font-size:13px" onclick="showView('home')">← Atrás</button>
+    <span class="logo mono">Casos</span>
+    <button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="newCase()">+ Nuevo</button>
+  </div>
+  <div class="content">
+    <div class="field"><input id="search-input" type="search" placeholder="Buscar por iniciales o diagnóstico..." oninput="renderList()"></div>
+    <div id="cases-list"></div>
+  </div>
+</div>
+
+<!-- USG -->
+<div id="view-usg" class="view">
+  <div class="header">
+    <button class="btn-ghost" style="padding:8px 14px;font-size:13px" onclick="showView('home')">← Atrás</button>
+    <span class="logo mono">Protocolo USG</span>
+    <span id="usg-counter" style="font-size:12px;color:#475569"></span>
+  </div>
+  <div class="content">
+    <div class="usg-nav-nums" id="usg-nav-nums"></div>
+    <div id="usg-content"></div>
+    <div class="btn-row">
+      <button class="btn-ghost" id="usg-prev" onclick="usgPrev()">← Anterior</button>
+      <button class="btn-primary" id="usg-next" onclick="usgNext()">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbzeRvOf2FQcZdtLDAWW6fu86fr1GOkAkrSArlVdcso4Oy01jD1Do6S5IIooBFVFbmx1/exec";
+const STORAGE_KEY = "shoulder_cases_v2";
+
+const DIAGNOSTICOS = ["Desgarro manguito rotador (parcial)","Desgarro manguito rotador (completo)","Tendinopatía supraespinoso","Tendinopatía infraespinoso","Tendinopatía subescapular","Tendinitis calcificante","Bursitis subacromial","Ruptura tendón bíceps proximal","Tendinopatía bíceps proximal","Inestabilidad glenohumeral anterior","Inestabilidad glenohumeral posterior","Lesión SLAP","Capsulitis adhesiva (hombro congelado)","Artrosis glenohumeral","Artrosis AC","Lesión AC aguda","Fractura (especificar)","Otro"];
+const TESTS = ["Neer","Hawkins-Kennedy","Jobe (vacío)","Patte","Gerber (lift-off)","Speed","Yergason","O'Brien (SLAP)","Apprehension","Relocation","Cross-arm","Sulcus","Gagey"];
+const USG_ESTRUCTURAS = ["Bíceps","Subescapular","Intervalo rotadores","Supraespinoso","Infraespinoso","Bursa BASD","Art. AC","Art. GH posterior"];
+const USG_PROTOCOLO = [
+  {titulo:"Tendón del bíceps — Corredera bicipital",posicion:"Paciente sentado, brazo en posición neutra con codo flexionado 90°, palma hacia arriba (supinación).",tecnica:"Transductor transversal sobre la corredera bicipital. Luego rotar 90° para vista longitudinal. Comparar lado contralateral.",normal:"Estructura ovalada hiperecoica en vista transversal. Fibrilar en longitudinal. Rodeado de mínimo líquido.",patologia:["Tenosinovitis: halo anecogénico alrededor del tendón","Ruptura: ausencia del tendón en la corredera","Tendinopatía: engrosamiento, hipoecogenicidad, pérdida patrón fibrilar","Luxación medial: tendón fuera de la corredera"],maniobra:"Rotación interna/externa del hombro para confirmar luxación dinámica del bíceps.",tip:"Traza el tendón desde la corredera hasta la unión miotendinosa para no perder rupturas parciales proximales."},
+  {titulo:"Subescapular",posicion:"Brazo en rotación externa máxima pasiva. Transductor en posición anterior.",tecnica:"Vista longitudinal con el tendón siguiendo su trayecto hasta la troquín (tuberosidad menor). Vista transversal perpendicular.",normal:"Tendón multipennate. Múltiples capas hiperecoicas con septos hipoecoicos entre ellas.",patologia:["Desgarro parcial de la capa superior: discontinuidad del borde superior del tendón","Desgarro completo: retracción medial, pérdida de la huella en troquín","Calcinosis en el tendón"],maniobra:"Rotación interna y externa dinámica para evaluar el intervalo y el tendón bíceps simultáneamente.",tip:"El desgarro del subescapular frecuentemente acompaña luxación medial del bíceps. Si ves luxación del bíceps, busca siempre lesión del subescapular."},
+  {titulo:"Intervalo de los rotadores",posicion:"Rotación neutra. Transductor en posición anterolateral.",tecnica:"Identificar el espacio entre el tendón del bíceps (medial) y el borde anterior del supraespinoso (lateral). Buscar ligamento glenohumeral superior y coracohumeral.",normal:"Espacio bien definido sin colección. Ligamentos visibles como bandas hiperecoicas.",patologia:["Colección en el intervalo: sugiere capsulitis adhesiva o artropatía inflamatoria","Engrosamiento del ligamento coracohumeral: capsulitis adhesiva"],maniobra:null,tip:"En capsulitis adhesiva el intervalo aparece 'relleno' por tejido hipoecoico engrosado. Muy útil para confirmar diagnóstico clínico."},
+  {titulo:"Supraespinoso",posicion:"Posición de Crass modificada: mano ipsilateral en bolsillo posterior (extensión + rotación interna).",tecnica:"Inicio en vista longitudinal (paralelo al tendón). Luego transversal. Rastreo completo desde la unión miotendinosa hasta la huella en el troquíter.",normal:"Estructura hiperecoica, fibrilar, convexa en su superficie superficial. Grosor normal aprox. 6-7mm.",patologia:["Tendinopatía: engrosamiento, hipoecogenicidad focal, pérdida del patrón fibrilar","Desgarro parcial articular (PASTA): defecto hipoecoico/anecoico en la cara profunda","Desgarro parcial bursal: defecto en la cara superficial","Desgarro completo: defecto a espesor total, signo del cartílago desnudo","Calcinosis: focos hiperecogénicos con o sin sombra acústica posterior"],maniobra:"Compresión dinámica bajo el acromion en abducción para evaluar pinzamiento.",tip:"El 'signo del cartílago desnudo' confirma desgarro completo. La retracción del muñón indica cronicidad."},
+  {titulo:"Bursa subacromial-subdeltoidea (BASD)",posicion:"Misma posición que para supraespinoso.",tecnica:"La bursa se visualiza como una línea hipoecoica entre el tendón del supraespinoso y el músculo deltoides. Medición del grosor en milímetros.",normal:"Línea fina hipoecoica < 2mm. Borde liso.",patologia:["Bursitis: engrosamiento > 2mm, contenido anecoico o hipoecoico, pérdida del borde liso","Bursitis cálcica: calcio dentro de la bursa"],maniobra:"Compresión dinámica bajo el acromion para confirmar contenido líquido vs tejido.",tip:"Siempre medir el grosor bursal en el punto de mayor engrosamiento y documentar si hay derrame libre vs tejido inflamatorio."},
+  {titulo:"Infraespinoso y redondo menor",posicion:"Paciente en rotación interna (mano en el hombro contralateral). Transductor posterior.",tecnica:"Vista longitudinal primero, luego transversal. El infraespinoso se inserta en la faceta media del troquíter; el redondo menor en la faceta inferior.",normal:"Tendones hiperecoicos, fibrilares. El infraespinoso es más grueso y anterior; el redondo menor posterior.",patologia:["Desgarro del infraespinoso: defecto hipoecoico/anecoico en la huella","Atrofia muscular infraespinoso: músculo hiperecogénico (graso), fosa infraespinosa vacía"],maniobra:null,tip:"La atrofia grasa del infraespinoso visible en USG es mal pronóstico quirúrgico. Siempre documentarla."},
+  {titulo:"Articulación acromioclavicular (AC)",posicion:"Transductor coronal sobre la articulación AC.",tecnica:"Identificar la articulación, el disco intraarticular, y el ligamento AC superior. Medir la distancia articular.",normal:"Espacio articular simétrico < 3mm. Ligamento AC visible como banda hiperecoica.",patologia:["Artrosis AC: irregularidad articular, osteofitos, derrame","Lesión aguda: ensanchamiento articular, derrame, lesión ligamentaria","Osteólisis de clavícula distal: erosión hipoecoica del extremo distal"],maniobra:"Compresión directa sobre la AC para evaluar dolor y crepitación.",tip:"Comparar siempre con el lado contralateral. La asimetría > 2mm en el espacio articular es significativa."},
+  {titulo:"Articulación glenohumeral — receso posterior",posicion:"Transductor posterior en el espacio entre el infraespinoso y el redondo menor, dirigido hacia la GH.",tecnica:"Vista coronal oblicua. Identificar la cabeza humeral, el labrum posterior y el receso posterior de la cápsula.",normal:"Mínimo líquido en el receso posterior (< 2mm). Labrum posterior hiperecoico, triangular.",patologia:["Derrame glenohumeral: colección anecoica en el receso","Loose bodies: focos hiperecogénicos móviles dentro del derrame","Ganglión paralabral: colección quística adyacente al labrum"],maniobra:null,tip:"El receso posterior es el sitio más fácil para detectar derrame glenohumeral y guiar aspiración si es necesario."}
+];
+
+// State
+let cases = [];
+let currentCase = null;
+let currentView = 'home';
+let usgStep = 0;
+let chipState = { sexo: null, lado: null, dominancia: null, tests: [], usgRealizado: null, usgEquipo: null, usgEstructuras: [], imagen: [], tratamiento: null, estado: null };
+
+// Storage
+function loadLocal() {
+  try { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : []; } catch { return []; }
+}
+function saveLocal(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+}
+
+// Sheets sync
+async function syncFromSheets() {
+  setSyncStatus("Cargando...", false);
+  try {
+    const res = await fetch(SHEETS_URL + "?t=" + Date.now());
+    const rows = await res.json();
+    if (rows.length > 1) {
+      const headers = rows[0];
+      cases = rows.slice(1).map(row => {
+        const o = {};
+        headers.forEach((h,i) => o[h] = row[i]);
+        return {
+          id: o.id, fecha: o.fecha, iniciales: o.iniciales, edad: o.edad,
+          sexo: o.sexo, lado: o.lado, dominancia: o.dominancia,
+          ocupacion: o.ocupacion, evolucion: o.evolucion, mecanismo: o.mecanismo,
+          diagnostico: o.diagnostico, diagnosticoLibre: "",
+          testsClinicos: o.tests_positivos ? o.tests_positivos.split(", ").filter(Boolean) : [],
+          usgRealizado: o.usg_realizado === "Sí",
+          usgEquipo: o.usg_equipo || "", usgHallazgos: o.usg_hallazgos || "",
+          usgEstructuras: [],
+          rx: o.rx === "Sí", mri: o.mri === "Sí", notasImagen: o.notas_imagen || "",
+          tratamiento: o.tratamiento || "", tecnica: o.tecnica || "", notas: o.notas || "",
+          dash: o.dash || "", ases: o.ases || "", constant: o.constant || "", eva: o.eva || "",
+          resuelto: o.resuelto === "Sí", testsNotas: ""
+        };
+      });
+      saveLocal(cases);
+      setSyncStatus("✓ Sincronizado", true);
+    } else {
+      cases = loadLocal();
+      setSyncStatus("✓ Conectado", true);
+    }
+  } catch {
+    cases = loadLocal();
+    setSyncStatus("⚠ Sin conexión — datos locales", false);
+  }
+  renderHome();
+}
+
+async function pushToSheets(c) {
+  try {
+    await fetch(SHEETS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "save", case: {
+      id: c.id, fecha: c.fecha, iniciales: c.iniciales, edad: c.edad, sexo: c.sexo,
+      lado: c.lado, dominancia: c.dominancia, ocupacion: c.ocupacion, evolucion: c.evolucion,
+      mecanismo: c.mecanismo, diagnostico: c.diagnostico, tratamiento: c.tratamiento,
+      tecnica: c.tecnica, notas: c.notas,
+      usg: { realizado: c.usgRealizado, equipo: c.usgEquipo, hallazgos: c.usgHallazgos },
+      testsClinicos: c.testsClinicos,
+      imagen: { rx: c.rx, mri: c.mri, notasImagen: c.notasImagen },
+      scores: { inicial: { DASH: c.dash, ASES: c.ases, CONSTANT: c.constant, VAS: c.eva } },
+      resuelto: c.resuelto
+    }})});
+  } catch {}
+}
+
+async function deleteFromSheets(id) {
+  try {
+    await fetch(SHEETS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", id }) });
+  } catch {}
+}
+
+function setSyncStatus(msg, ok) {
+  const el = document.getElementById('home-sync');
+  if (el) { el.textContent = msg; el.className = 'sync-status ' + (ok ? 'sync-ok' : 'sync-warn'); }
+}
+
+// Views
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  currentView = name;
+  if (name === 'home') renderHome();
+  if (name === 'list') renderList();
+  if (name === 'usg') renderUSG();
+  window.scrollTo(0, 0);
+}
+
+// Home
+function renderHome() {
+  document.getElementById('stat-total').textContent = cases.length;
+  document.getElementById('stat-qx').textContent = cases.filter(c => c.tratamiento === 'quirurgico').length;
+  document.getElementById('stat-cons').textContent = cases.filter(c => c.tratamiento === 'conservador').length;
+  const recent = document.getElementById('recent-cases');
+  if (cases.length === 0) { recent.innerHTML = ''; return; }
+  const last3 = cases.slice(-3).reverse();
+  recent.innerHTML = '<div style="font-family:\'Courier New\',monospace;font-size:11px;color:#38bdf8;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1e293b">Recientes</div>' +
+    last3.map(c => caseRowHTML(c)).join('');
+}
+
+function caseRowHTML(c) {
+  const txTag = c.tratamiento === 'quirurgico' ? `<span class="tag tag-yellow">${c.tratamiento}</span>` :
+    c.tratamiento ? `<span class="tag tag-blue">${c.tratamiento}</span>` : '';
+  const usgTag = c.usgRealizado ? `<span class="tag tag-purple">USG</span>` : '';
+  const doneTag = c.resuelto ? `<span class="tag tag-green">✓</span>` : '';
+  return `<div class="case-row" onclick="openCase('${c.id}')">
+    <div class="case-header">
+      <span class="case-name">${c.iniciales || '—'}</span>
+      <div>${usgTag}${txTag}${doneTag}</div>
+    </div>
+    <div style="font-size:13px;color:#94a3b8">${c.edad || ''}a · ${c.sexo || ''} · ${c.lado || ''}</div>
+    <div style="font-size:13px;color:#64748b;margin-top:4px">${c.diagnostico || 'Sin diagnóstico'}</div>
+    <div style="font-size:11px;color:#334155;margin-top:3px">${c.fecha || ''} · ${c.evolucion || ''}</div>
+  </div>`;
+}
+
+// List
+function renderList() {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const filtered = cases.filter(c =>
+    !q || (c.iniciales||'').toLowerCase().includes(q) || (c.diagnostico||'').toLowerCase().includes(q)
+  );
+  const el = document.getElementById('cases-list');
+  if (filtered.length === 0) { el.innerHTML = '<div class="empty">No hay casos registrados</div>'; return; }
+  el.innerHTML = filtered.map(c => caseRowHTML(c)).join('');
+}
+
+// Chip helpers
+function buildChips(containerId, options, selectedVal, multi, onChange) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = options.map(opt => {
+    const val = typeof opt === 'string' ? opt : opt.value;
+    const lbl = typeof opt === 'string' ? opt : opt.label;
+    const active = multi ? (selectedVal||[]).includes(val) : selectedVal === val;
+    return `<button class="chip ${active?'active':''}" onclick="chipClick('${containerId}','${val}',${multi})">${lbl}</button>`;
+  }).join('');
+  el._onChange = onChange;
+}
+
+function chipClick(containerId, val, multi) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const btns = el.querySelectorAll('.chip');
+  if (multi) {
+    btns.forEach(b => { if (b.textContent === val || b.onclick?.toString().includes(`'${val}'`)) b.classList.toggle('active'); });
+  } else {
+    btns.forEach(b => b.classList.remove('active'));
+    btns.forEach(b => { if (b.onclick?.toString().includes(`'${val}'`)) b.classList.add('active'); });
+  }
+  if (el._onChange) el._onChange(val);
+}
+
+function getChipSelected(containerId, multi) {
+  const el = document.getElementById(containerId);
+  if (!el) return multi ? [] : null;
+  const active = [...el.querySelectorAll('.chip.active')].map(b => {
+    const match = b.onclick?.toString().match(/'([^']+)',\s*(true|false)/);
+    return match ? match[1] : b.textContent;
+  });
+  return multi ? active : (active[0] || null);
+}
+
+// Form
+function buildForm(c) {
+  // Set text fields
+  document.getElementById('f-iniciales').value = c.iniciales || '';
+  document.getElementById('f-edad').value = c.edad || '';
+  document.getElementById('f-fecha').value = c.fecha || new Date().toISOString().split('T')[0];
+  document.getElementById('f-ocupacion').value = c.ocupacion || '';
+  document.getElementById('f-evolucion').value = c.evolucion || '';
+  document.getElementById('f-mecanismo').value = c.mecanismo || '';
+  document.getElementById('f-dash').value = c.dash || '';
+  document.getElementById('f-ases').value = c.ases || '';
+  document.getElementById('f-constant').value = c.constant || '';
+  document.getElementById('f-eva').value = c.eva || '';
+  document.getElementById('f-tests-notas').value = c.testsNotas || '';
+  document.getElementById('f-usg-hallazgos').value = c.usgHallazgos || '';
+  document.getElementById('f-imagen-notas').value = c.notasImagen || '';
+  document.getElementById('f-tecnica').value = c.tecnica || '';
+  document.getElementById('f-notas').value = c.notas || '';
+  document.getElementById('f-dx-libre').value = c.diagnosticoLibre || '';
+
+  // Chips
+  buildChips('chips-sexo', [{value:'M',label:'Masculino'},{value:'F',label:'Femenino'}], c.sexo, false, null);
+  buildChips('chips-lado', ['Derecho','Izquierdo','Bilateral'], c.lado, false, null);
+  buildChips('chips-dominancia', ['Diestro','Zurdo','Ambidiestro'], c.dominancia, false, null);
+  buildChips('chips-tests', TESTS, c.testsClinicos || [], true, () => {
+    const sel = getChipSelected('chips-tests', true);
+    document.getElementById('tests-notas-wrap').style.display = sel.length > 0 ? 'block' : 'none';
+  });
+  buildChips('chips-usg-realizado', [{value:'si',label:'✓ Sí'},{value:'no',label:'No'}], c.usgRealizado ? 'si' : 'no', false, v => {
+    document.getElementById('usg-detail').style.display = v === 'si' ? 'block' : 'none';
+  });
+  buildChips('chips-usg-equipo', [{value:'Portátil propio (Colón)',label:'Portátil Colón'},{value:'Equipo fijo (Panamá)',label:'Fijo Panamá'}], c.usgEquipo || null, false, null);
+  buildChips('chips-usg-estructuras', USG_ESTRUCTURAS, c.usgEstructuras || [], true, null);
+  buildChips('chips-imagen', [{value:'rx',label:'Radiografía'},{value:'mri',label:'MRI'}], [c.rx?'rx':null,c.mri?'mri':null].filter(Boolean), true, null);
+  buildChips('chips-tratamiento', [{value:'conservador',label:'Conservador'},{value:'quirurgico',label:'Quirúrgico'},{value:'infiltracion',label:'Infiltración'},{value:'fisioterapia',label:'Fisioterapia'}], c.tratamiento || null, false, v => {
+    document.getElementById('tecnica-wrap').style.display = (v==='quirurgico'||v==='infiltracion') ? 'block' : 'none';
+  });
+  buildChips('chips-estado', [{value:'seguimiento',label:'En seguimiento'},{value:'resuelto',label:'✓ Resuelto'}], c.resuelto ? 'resuelto' : 'seguimiento', false, null);
+
+  // Diagnosis list
+  const dxEl = document.getElementById('dx-list');
+  dxEl.innerHTML = DIAGNOSTICOS.map(d =>
+    `<button class="dx-item ${c.diagnostico===d?'active':''}" onclick="selectDx('${d}')">${d}</button>`
+  ).join('');
+
+  // Conditional shows
+  document.getElementById('tests-notas-wrap').style.display = (c.testsClinicos||[]).length > 0 ? 'block' : 'none';
+  document.getElementById('usg-detail').style.display = c.usgRealizado ? 'block' : 'none';
+  document.getElementById('tecnica-wrap').style.display = (c.tratamiento==='quirurgico'||c.tratamiento==='infiltracion') ? 'block' : 'none';
+  document.getElementById('dx-libre-wrap').style.display = c.diagnostico === 'Otro' ? 'block' : 'none';
+}
+
+function selectDx(val) {
+  document.querySelectorAll('.dx-item').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('dx-libre-wrap').style.display = val === 'Otro' ? 'block' : 'none';
+}
+
+function getSelectedDx() {
+  const active = document.querySelector('.dx-item.active');
+  return active ? active.textContent : '';
+}
+
+function newCase() {
+  currentCase = { id: null, iniciales:'', edad:'', fecha:'', sexo:'', lado:'', dominancia:'', ocupacion:'', evolucion:'', mecanismo:'', diagnostico:'', diagnosticoLibre:'', testsClinicos:[], testsNotas:'', usgRealizado:false, usgEquipo:'', usgHallazgos:'', usgEstructuras:[], rx:false, mri:false, notasImagen:'', tratamiento:'', tecnica:'', notas:'', dash:'', ases:'', constant:'', eva:'', resuelto:false };
+  document.getElementById('form-title').textContent = 'Nuevo caso';
+  document.getElementById('delete-btn-wrap').style.display = 'none';
+  buildForm(currentCase);
+  showView('form');
+}
+
+function openCase(id) {
+  currentCase = cases.find(c => String(c.id) === String(id));
+  if (!currentCase) return;
+  document.getElementById('form-title').textContent = 'Editar caso';
+  document.getElementById('delete-btn-wrap').style.display = 'block';
+  buildForm(currentCase);
+  showView('form');
+}
+
+function collectForm() {
+  const dx = getSelectedDx();
+  return {
+    ...currentCase,
+    id: currentCase.id || Date.now(),
+    iniciales: document.getElementById('f-iniciales').value,
+    edad: document.getElementById('f-edad').value,
+    fecha: document.getElementById('f-fecha').value,
+    sexo: getChipSelected('chips-sexo', false),
+    lado: getChipSelected('chips-lado', false),
+    dominancia: getChipSelected('chips-dominancia', false),
+    ocupacion: document.getElementById('f-ocupacion').value,
+    evolucion: document.getElementById('f-evolucion').value,
+    mecanismo: document.getElementById('f-mecanismo').value,
+    dash: document.getElementById('f-dash').value,
+    ases: document.getElementById('f-ases').value,
+    constant: document.getElementById('f-constant').value,
+    eva: document.getElementById('f-eva').value,
+    testsClinicos: getChipSelected('chips-tests', true),
+    testsNotas: document.getElementById('f-tests-notas').value,
+    usgRealizado: getChipSelected('chips-usg-realizado', false) === 'si',
+    usgEquipo: getChipSelected('chips-usg-equipo', false),
+    usgHallazgos: document.getElementById('f-usg-hallazgos').value,
+    usgEstructuras: getChipSelected('chips-usg-estructuras', true),
+    rx: getChipSelected('chips-imagen', true).includes('rx'),
+    mri: getChipSelected('chips-imagen', true).includes('mri'),
+    notasImagen: document.getElementById('f-imagen-notas').value,
+    diagnostico: dx,
+    diagnosticoLibre: document.getElementById('f-dx-libre').value,
+    tratamiento: getChipSelected('chips-tratamiento', false),
+    tecnica: document.getElementById('f-tecnica').value,
+    notas: document.getElementById('f-notas').value,
+    resuelto: getChipSelected('chips-estado', false) === 'resuelto'
+  };
+}
+
+async function saveCase() {
+  const c = collectForm();
+  const btn = document.getElementById('save-btn');
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+
+  // Save locally first
+  if (currentCase.id) {
+    const idx = cases.findIndex(x => String(x.id) === String(c.id));
+    if (idx !== -1) cases[idx] = c; else cases.push(c);
+  } else {
+    cases.push(c);
+  }
+  saveLocal(cases);
+
+  // Push to Sheets
+  await pushToSheets(c);
+
+  btn.textContent = '✓ Guardado';
+  btn.className = 'btn-success';
+  setTimeout(() => {
+    btn.textContent = 'Guardar';
+    btn.className = 'btn-primary';
+    btn.disabled = false;
+    showView('home');
+  }, 1500);
+}
+
+async function deleteCurrentCase() {
+  if (!confirm('¿Eliminar este caso?')) return;
+  cases = cases.filter(c => String(c.id) !== String(currentCase.id));
+  saveLocal(cases);
+  await deleteFromSheets(currentCase.id);
+  showView('list');
+}
+
+// USG
+function renderUSG() {
+  const p = USG_PROTOCOLO[usgStep];
+  document.getElementById('usg-counter').textContent = `${usgStep+1}/${USG_PROTOCOLO.length}`;
+  const nums = document.getElementById('usg-nav-nums');
+  nums.innerHTML = USG_PROTOCOLO.map((_, i) =>
+    `<button class="usg-num ${i===usgStep?'active':''}" onclick="usgGoTo(${i})">${i+1}</button>`
+  ).join('');
+  const patHTML = p.patologia.map(pat => `<div class="pat-row">› ${pat}</div>`).join('');
+  const maniobra = p.maniobra ? `<div class="usg-step"><div class="usg-step-label">🔄 Maniobra dinámica</div><div class="usg-step-text">${p.maniobra}</div></div>` : '';
+  document.getElementById('usg-content').innerHTML = `
+    <div class="usg-card">
+      <div style="font-size:17px;font-weight:700;color:#38bdf8;margin-bottom:16px">${p.titulo}</div>
+      <div class="usg-step"><div class="usg-step-label">📐 Posición</div><div class="usg-step-text">${p.posicion}</div></div>
+      <div class="usg-step"><div class="usg-step-label">🔬 Técnica</div><div class="usg-step-text">${p.tecnica}</div></div>
+      <div class="usg-step"><div class="usg-step-label">✅ Normal</div><div class="usg-step-text">${p.normal}</div></div>
+      <div style="margin-bottom:10px"><div class="usg-step-label" style="color:#f87171;margin-bottom:8px">⚠️ Patología</div>${patHTML}</div>
+      ${maniobra}
+      <div class="tip-box"><div class="tip-label">💡 Tip clínico</div><div class="tip-text">${p.tip}</div></div>
+    </div>`;
+  document.getElementById('usg-prev').disabled = usgStep === 0;
+  document.getElementById('usg-next').disabled = usgStep === USG_PROTOCOLO.length - 1;
+}
+
+function usgGoTo(i) { usgStep = i; renderUSG(); window.scrollTo(0,0); }
+function usgPrev() { if (usgStep > 0) { usgStep--; renderUSG(); window.scrollTo(0,0); } }
+function usgNext() { if (usgStep < USG_PROTOCOLO.length-1) { usgStep++; renderUSG(); window.scrollTo(0,0); } }
+
+// Init
+syncFromSheets();
+</script>
+</body>
+</html>
