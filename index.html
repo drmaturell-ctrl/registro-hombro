@@ -328,7 +328,9 @@ async function syncFromSheets() {
       const headers = rows[0];
       cases = rows.slice(1).map(row => {
         const o = {}; headers.forEach((h,i) => o[h] = row[i]);
-        return { id:o.id, nombre:o.nombre||"", telefono:o.telefono||"", expediente:o.expediente||"", fecha:o.fecha, edad:o.edad, sexo:o.sexo, tipo:o.tipo||"", lado:o.lado, dominancia:o.dominancia, ocupacion:o.ocupacion, evolucion:o.evolucion, mecanismo:o.mecanismo, dash:o.dash||"", ases:o.ases||"", constant:o.constant||"", eva:o.eva||"", romFlex:o.rom_flex||"", romExt:o.rom_ext||"", romAbd:o.rom_abd||"", romAdu:o.rom_adu||"", romRI:o.rom_ri||"", romRE:o.rom_re||"", romNotas:o.rom_notas||"", testsClinicos:o.tests_positivos?o.tests_positivos.split(", ").filter(Boolean):[], testsNotas:"", usgRealizado:o.usg_realizado==="Sí", usgEquipo:o.usg_equipo||"", usgHallazgos:o.usg_hallazgos||"", usgEstructuras:[], rx:o.rx==="Sí", mri:o.mri==="Sí", notasImagen:o.notas_imagen||"", diagnostico:o.diagnostico||"", diagnosticoLibre:"", tratamiento:o.tratamiento||"", tecnica:o.tecnica||"", notas:o.notas||"", resuelto:o.resuelto==="Sí" };
+        // Fix date format
+        const cleanDate = (d) => { if (!d) return ''; if (typeof d === 'string' && d.includes('T')) return d.split('T')[0]; return d; };
+        return { id:o.id, nombre:o.nombre||o.iniciales||"", telefono:o.telefono||"", expediente:o.expediente||"", fecha:o.fecha, edad:o.edad, sexo:o.sexo, tipo:o.tipo||"", lado:o.lado, dominancia:o.dominancia, ocupacion:o.ocupacion, evolucion:o.evolucion, mecanismo:o.mecanismo, dash:o.dash||"", ases:o.ases||"", constant:o.constant||"", eva:o.eva||"", romFlex:o.rom_flex||"", romExt:o.rom_ext||"", romAbd:o.rom_abd||"", romAdu:o.rom_adu||"", romRI:o.rom_ri||"", romRE:o.rom_re||"", romNotas:o.rom_notas||"", testsClinicos:o.tests_positivos?o.tests_positivos.split(", ").filter(Boolean):[], testsNotas:"", usgRealizado:o.usg_realizado==="Sí", usgEquipo:o.usg_equipo||"", usgHallazgos:o.usg_hallazgos||"", usgEstructuras:[], rx:o.rx==="Sí", mri:o.mri==="Sí", notasImagen:o.notas_imagen||"", diagnostico:o.diagnostico||"", diagnosticoLibre:"", tratamiento:o.tratamiento||"", tecnica:o.tecnica||"", notas:o.notas||"", resuelto:o.resuelto==="Sí" };
       });
       saveLocal(cases);
       setSyncStatus("✓ Sincronizado", true);
@@ -341,7 +343,7 @@ async function pushToSheets(c) {
   try {
     await fetch(SHEETS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"save", case:{
       id:c.id, nombre:c.nombre, telefono:c.telefono, expediente:c.expediente, fecha:c.fecha, edad:c.edad, sexo:c.sexo, tipo:c.tipo, lado:c.lado, dominancia:c.dominancia, ocupacion:c.ocupacion, evolucion:c.evolucion, mecanismo:c.mecanismo,
-      dash:c.dash, ases:c.ases, constant:c.constant, eva:c.eva,
+      dash:c.dash, ases:c.ases, constant:c.constant, eva:c.eva, fecha_final:c.fechaFinal, dash_final:c.dashFinal, ases_final:c.asesFinal, constant_final:c.constantFinal, eva_final:c.evaFinal,
       rom_flex:c.romFlex, rom_ext:c.romExt, rom_abd:c.romAbd, rom_adu:c.romAdu, rom_ri:c.romRI, rom_re:c.romRE, rom_notas:c.romNotas,
       testsClinicos:c.testsClinicos, usg:{realizado:c.usgRealizado, equipo:c.usgEquipo, hallazgos:c.usgHallazgos},
       imagen:{rx:c.rx, mri:c.mri, notasImagen:c.notasImagen},
@@ -383,11 +385,12 @@ function caseRowHTML(c) {
   const usgTag = c.usgRealizado?`<span class="tag tag-purple">USG</span>`:'';
   const tipoTag = c.tipo?`<span class="tag tag-cyan">${c.tipo}</span>`:'';
   const doneTag = c.resuelto?`<span class="tag tag-green">✓</span>`:'';
+  const displayDate = (c.fecha||'').substring(0,10);
   return `<div class="case-row" onclick="openCase('${c.id}')">
     <div class="case-header"><span class="case-name">${c.nombre||'—'}</span><div>${tipoTag}${usgTag}${txTag}${doneTag}</div></div>
     <div style="font-size:13px;color:#94a3b8">${c.edad||''}a · ${c.sexo||''} · ${c.lado||''} · ${c.telefono||''}</div>
     <div style="font-size:13px;color:#64748b;margin-top:4px">${c.diagnostico||'Sin diagnóstico'}</div>
-    <div style="font-size:11px;color:#334155;margin-top:3px">${c.fecha||''} · ${c.evolucion||''}</div>
+    <div style="font-size:11px;color:#334155;margin-top:3px">${displayDate} · ${c.evolucion||''}</div>
   </div>`;
 }
 
