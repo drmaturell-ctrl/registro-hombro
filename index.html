@@ -206,25 +206,8 @@
 
     <!-- TESTS CLINICOS -->
     <div class="card">
-      <div class="section-title">Tests clínicos positivos</div>
-      <div class="chips" id="chips-tests"></div>
-      <div id="tests-notas-wrap" style="display:none">
-        <div class="field"><label>Notas sobre tests</label><textarea id="f-tests-notas" placeholder="Observaciones adicionales..."></textarea></div>
-      </div>
-    </div>
-
-    <!-- USG -->
-    <div class="card">
-      <div class="section-title">Ultrasonido</div>
-      <span class="chip-label">¿Realizó USG?</span>
-      <div class="chips" id="chips-usg-realizado"></div>
-      <div id="usg-detail" style="display:none">
-        <span class="chip-label">Equipo</span>
-        <div class="chips" id="chips-usg-equipo"></div>
-        <span class="chip-label">Estructuras evaluadas</span>
-        <div class="chips" id="chips-usg-estructuras"></div>
-        <div class="field"><label>Hallazgos USG</label><textarea id="f-usg-hallazgos" placeholder="Describe hallazgos, mediciones, lateralidad..."></textarea></div>
-      </div>
+      <div class="section-title">Examen físico — Tests clínicos</div>
+      <div class="field"><label>Tests positivos y hallazgos</label><textarea id="f-tests-notas" placeholder="Describe los tests positivos y hallazgos del examen físico..."></textarea></div>
     </div>
 
     <!-- IMAGEN -->
@@ -232,7 +215,7 @@
       <div class="section-title">Imágenes</div>
       <span class="chip-label">Estudios disponibles</span>
       <div class="chips" id="chips-imagen"></div>
-      <div class="field"><label>Notas de imagen</label><textarea id="f-imagen-notas" placeholder="Hallazgos relevantes de RX o MRI..."></textarea></div>
+      <div class="field"><label>Notas de imagen</label><textarea id="f-imagen-notas" placeholder="Hallazgos relevantes de RX, USG o MRI..."></textarea></div>
     </div>
 
     <!-- DIAGNOSTICO -->
@@ -250,7 +233,7 @@
       <span class="chip-label">Tipo</span>
       <div class="chips" id="chips-tratamiento"></div>
       <div id="tecnica-wrap" style="display:none">
-        <div class="field"><label>Técnica / procedimiento</label><input id="f-tecnica" type="text" placeholder="Ej: reparación artroscópica manguito..." autocorrect="off"></div>
+        <div class="field"><label>Técnica / procedimiento</label><input id="f-tecnica" type="text" placeholder="Ej: reparación artroscópica manguito, fisioterapia, AINES..." autocorrect="off"></div>
       </div>
       <div class="field"><label>Notas clínicas</label><textarea id="f-notas" placeholder="Observaciones, plan de seguimiento, hallazgos..."></textarea></div>
       <span class="chip-label">Estado del caso</span>
@@ -467,26 +450,19 @@ function buildForm(c) {
   buildChips('chips-tipo', [{value:'CSS',label:'CSS'},{value:'Privado',label:'Privado'}], c.tipo||null, false, null);
   buildChips('chips-lado', ['Derecho','Izquierdo','Bilateral'], c.lado, false, null);
   buildChips('chips-dominancia', ['Diestro','Zurdo','Ambidiestro'], c.dominancia, false, null);
-  buildChips('chips-tests', TESTS, c.testsClinicos||[], true, () => {
-    document.getElementById('tests-notas-wrap').style.display = getChipSelected('chips-tests',true).length>0?'block':'none';
-  });
-  buildChips('chips-usg-realizado', [{value:'si',label:'✓ Sí'},{value:'no',label:'No'}], c.usgRealizado?'si':'no', false, v => {
-    document.getElementById('usg-detail').style.display = v==='si'?'block':'none';
-  });
-  buildChips('chips-usg-equipo', [{value:'Portátil propio (Colón)',label:'Portátil Colón'},{value:'Equipo fijo (Panamá)',label:'Fijo Panamá'}], c.usgEquipo||null, false, null);
-  buildChips('chips-usg-estructuras', USG_ESTRUCTURAS, c.usgEstructuras||[], true, null);
-  buildChips('chips-imagen', [{value:'rx',label:'Radiografía'},{value:'mri',label:'MRI'}], [c.rx?'rx':null,c.mri?'mri':null].filter(Boolean), true, null);
-  buildChips('chips-tratamiento', [{value:'conservador',label:'Conservador'},{value:'quirurgico',label:'Quirúrgico'},{value:'infiltracion',label:'Infiltración'},{value:'fisioterapia',label:'Fisioterapia'}], c.tratamiento||null, false, v => {
-    document.getElementById('tecnica-wrap').style.display=(v==='quirurgico'||v==='infiltracion')?'block':'none';
+
+
+  buildChips('chips-imagen', [{value:'rx',label:'Radiografía'},{value:'usg',label:'Ultrasonido'},{value:'mri',label:'MRI'}], [c.rx?'rx':null,c.usg?'usg':null,c.mri?'mri':null].filter(Boolean), true, null);
+  buildChips('chips-tratamiento', [{value:'conservador',label:'Conservador'},{value:'quirurgico',label:'Quirúrgico'}], c.tratamiento||null, false, v => {
+    document.getElementById('tecnica-wrap').style.display = v ? 'block' : 'none';
   });
   buildChips('chips-estado', [{value:'seguimiento',label:'En seguimiento'},{value:'resuelto',label:'✓ Resuelto'}], c.resuelto?'resuelto':'seguimiento', false, null);
 
   const dxEl = document.getElementById('dx-list');
   dxEl.innerHTML = DIAGNOSTICOS.map(d => `<button class="dx-item ${c.diagnostico===d?'active':''}" onclick="selectDx('${d}')">${d}</button>`).join('');
-  document.getElementById('tests-notas-wrap').style.display = (c.testsClinicos||[]).length>0?'block':'none';
-  document.getElementById('usg-detail').style.display = c.usgRealizado?'block':'none';
-  document.getElementById('tecnica-wrap').style.display = (c.tratamiento==='quirurgico'||c.tratamiento==='infiltracion')?'block':'none';
+  document.getElementById('tecnica-wrap').style.display = c.tratamiento ? 'block' : 'none';
   document.getElementById('dx-libre-wrap').style.display = c.diagnostico==='Otro'?'block':'none';
+  document.getElementById('tecnica-wrap').style.display = c.tratamiento ? 'block' : 'none';
 }
 
 function selectDx(val) {
@@ -544,13 +520,12 @@ function collectForm() {
     romRI:document.getElementById('f-rom-ri').value,
     romRE:document.getElementById('f-rom-re').value,
     romNotas:document.getElementById('f-rom-notas').value,
-    testsClinicos:getChipSelected('chips-tests',true),
+    testsClinicos:[],
     testsNotas:document.getElementById('f-tests-notas').value,
-    usgRealizado:getChipSelected('chips-usg-realizado',false)==='si',
-    usgEquipo:getChipSelected('chips-usg-equipo',false),
-    usgHallazgos:document.getElementById('f-usg-hallazgos').value,
-    usgEstructuras:getChipSelected('chips-usg-estructuras',true),
+    usgRealizado:getChipSelected('chips-imagen',true).includes('usg'),
+    usgEquipo:'', usgHallazgos:'', usgEstructuras:[],
     rx:getChipSelected('chips-imagen',true).includes('rx'),
+    usg:getChipSelected('chips-imagen',true).includes('usg'),
     mri:getChipSelected('chips-imagen',true).includes('mri'),
     notasImagen:document.getElementById('f-imagen-notas').value,
     diagnostico:getSelectedDx(),
