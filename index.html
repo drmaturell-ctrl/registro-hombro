@@ -440,7 +440,6 @@ function buildForm(c) {
   document.getElementById('f-rom-re').value = c.romRE||'';
   document.getElementById('f-rom-notas').value = c.romNotas||'';
   document.getElementById('f-tests-notas').value = c.testsNotas||'';
-  document.getElementById('f-usg-hallazgos').value = c.usgHallazgos||'';
   document.getElementById('f-imagen-notas').value = c.notasImagen||'';
   document.getElementById('f-tecnica').value = c.tecnica||'';
   document.getElementById('f-notas').value = c.notas||'';
@@ -460,7 +459,6 @@ function buildForm(c) {
 
   const dxEl = document.getElementById('dx-list');
   dxEl.innerHTML = DIAGNOSTICOS.map(d => `<button class="dx-item ${c.diagnostico===d?'active':''}" onclick="selectDx('${d}')">${d}</button>`).join('');
-  document.getElementById('tecnica-wrap').style.display = c.tratamiento ? 'block' : 'none';
   document.getElementById('dx-libre-wrap').style.display = c.diagnostico==='Otro'?'block':'none';
   document.getElementById('tecnica-wrap').style.display = c.tratamiento ? 'block' : 'none';
 }
