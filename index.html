@@ -379,14 +379,17 @@ function caseRowHTML(c) {
 
 function filterCases(q) {
   q = (q||'').toLowerCase().trim();
-  const filtered = !q ? cases : cases.filter(c =>
+  const allCases = cases.concat(loadLocal());
+  const unique = allCases.filter((c,i,a) => a.findIndex(x=>String(x.id)===String(c.id))===i);
+  const filtered = !q ? unique : unique.filter(c =>
     (c.nombre||'').toLowerCase().includes(q) ||
+    (c.iniciales||'').toLowerCase().includes(q) ||
     (c.diagnostico||'').toLowerCase().includes(q) ||
     (c.telefono||'').includes(q)
   );
   const el = document.getElementById('cases-list');
   if (!el) return;
-  el.innerHTML = filtered.length ? filtered.map(caseRowHTML).join('') : '<div class="empty">No hay resultados</div>';
+  el.innerHTML = filtered.length ? filtered.map(caseRowHTML).join('') : '<div class="empty">No hay resultados para "'+q+'"</div>';
 }
 
 function renderList() {
