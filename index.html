@@ -255,7 +255,7 @@
     <button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="newCase()">+ Nuevo</button>
   </div>
   <div class="content">
-    <div class="field"><input id="search-input" type="text" placeholder="Buscar por nombre o diagnóstico..." oninput="renderList()" onkeyup="renderList()" onchange="renderList()"></div>
+    <div class="field"><input id="search-input" type="text" placeholder="Buscar por nombre o diagnóstico..." style="font-size:16px" oninput="filterCases(this.value)" onkeyup="filterCases(this.value)"></div>
     <div id="cases-list"></div>
   </div>
 </div>
@@ -377,11 +377,21 @@ function caseRowHTML(c) {
   </div>`;
 }
 
+function filterCases(q) {
+  q = (q||'').toLowerCase().trim();
+  const filtered = !q ? cases : cases.filter(c =>
+    (c.nombre||'').toLowerCase().includes(q) ||
+    (c.diagnostico||'').toLowerCase().includes(q) ||
+    (c.telefono||'').includes(q)
+  );
+  const el = document.getElementById('cases-list');
+  if (!el) return;
+  el.innerHTML = filtered.length ? filtered.map(caseRowHTML).join('') : '<div class="empty">No hay resultados</div>';
+}
+
 function renderList() {
   const q = (document.getElementById('search-input')?.value||'').toLowerCase();
-  const filtered = cases.filter(c => !q||(c.nombre||'').toLowerCase().includes(q)||(c.diagnostico||'').toLowerCase().includes(q)||(c.telefono||'').includes(q));
-  const el = document.getElementById('cases-list');
-  el.innerHTML = filtered.length ? filtered.map(caseRowHTML).join('') : '<div class="empty">No hay casos registrados</div>';
+  filterCases(q);
 }
 
 function buildChips(containerId, options, selectedVal, multi, onChange) {
