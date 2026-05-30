@@ -255,7 +255,7 @@
     <button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="newCase()">+ Nuevo</button>
   </div>
   <div class="content">
-    <div class="field"><input id="search-input" type="search" placeholder="Buscar por nombre o diagnóstico..." oninput="renderList()"></div>
+    <div class="field"><input id="search-input" type="text" placeholder="Buscar por nombre o diagnóstico..." oninput="renderList()" onkeyup="renderList()" onchange="renderList()"></div>
     <div id="cases-list"></div>
   </div>
 </div>
