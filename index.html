@@ -395,13 +395,16 @@ function caseRowHTML(c) {
 function doSearch() {
   const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
   if (!q) { renderList(cases); return; }
+  if (cases.length === 0) {
+    const local = loadLocal();
+    if (local.length > 0) { cases = local; }
+  }
   const filtered = cases.filter(c => {
-    const dx = c.diagnostico === 'Otro' ? (c.diagnosticoLibre || '') : (c.diagnostico || '');
-    return (c.nombre || '').toLowerCase().includes(q) ||
-      dx.toLowerCase().includes(q) ||
-      (c.diagnostico || '').toLowerCase().includes(q) ||
-      (c.telefono || '').includes(q) ||
-      (c.expediente || '').includes(q);
+    const dx = ((c.diagnostico === 'Otro' ? c.diagnosticoLibre : c.diagnostico) || '').toLowerCase().trim();
+    const nombre = (c.nombre || '').toLowerCase().trim();
+    const tel = (c.telefono || '').trim();
+    const exp = (c.expediente || '').trim();
+    return nombre.includes(q) || dx.includes(q) || tel.includes(q) || exp.includes(q);
   });
   renderList(filtered, q);
 }
