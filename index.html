@@ -402,13 +402,15 @@ function liveSearch() {
   const q = (input.value || '').toLowerCase().trim();
   const pool = cases.length > 0 ? cases : loadLocal();
   if (!q) { renderList(pool); return; }
+  // Debug: show what diagnosticos we have
+  const dxList = pool.map(c => c.diagnostico || '').join(' | ');
+  console.log('Buscando:', q, '| Diagnósticos:', dxList);
   const filtered = pool.filter(c => {
-    const dx = (c.diagnostico || '').toLowerCase();
-    const dxLibre = (c.diagnosticoLibre || '').toLowerCase();
+    const dx = (c.diagnostico || '').toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const dxLibre = (c.diagnosticoLibre || '').toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
     const nombre = (c.nombre || '').toLowerCase();
-    const tel = (c.telefono || '');
-    const exp = (c.expediente || '');
-    return nombre.includes(q) || dx.includes(q) || dxLibre.includes(q) || tel.includes(q) || exp.includes(q);
+    const qNorm = q.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return nombre.includes(q) || dx.includes(qNorm) || dxLibre.includes(qNorm);
   });
   renderList(filtered, q);
 }
