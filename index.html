@@ -348,7 +348,7 @@ function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   if (name==='home') renderHome();
-  if (name==='list') renderList();
+  if (name==='list') { renderList(); document.getElementById('search-input').value=''; renderList(); }
   if (name==='usg') renderUSG();
   window.scrollTo(0,0);
 }
