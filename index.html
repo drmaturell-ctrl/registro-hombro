@@ -300,7 +300,7 @@ async function syncFromSheets() {
           testsNotas: o.tests_positivos || '',
           rx: o.rx === 'Sí', usg: o.usg_realizado === 'Sí', mri: o.mri === 'Sí',
           notasImagen: o.notas_imagen || '',
-          diagnostico: o.diagnostico || '', diagnosticoLibre: '',
+          diagnostico: (o.diagnostico || '').trim(), diagnosticoLibre: '',
           tratamiento: o.tratamiento || '', tecnica: o.tecnica || '',
           notas: o.notas || '', resuelto: o.resuelto === 'Sí'
         };
@@ -337,7 +337,7 @@ async function pushToSheets(c) {
         usg_realizado: c.usg ? 'Sí' : 'No',
         rx: c.rx ? 'Sí' : 'No', mri: c.mri ? 'Sí' : 'No',
         notas_imagen: c.notasImagen,
-        diagnostico: c.diagnostico, tratamiento: c.tratamiento,
+        diagnostico: c.diagnostico === 'Otro' ? (c.diagnosticoLibre || c.diagnostico) : c.diagnostico, tratamiento: c.tratamiento,
         tecnica: c.tecnica, notas: c.notas, resuelto: c.resuelto
       }})
     });
@@ -387,7 +387,7 @@ function caseRowHTML(c) {
       <div>${tipoTag}${txTag}${doneTag}</div>
     </div>
     <div style="font-size:13px;color:#94a3b8">${c.edad || ''}a · ${c.sexo || ''} · ${c.lado || ''} ${c.telefono ? '· ' + c.telefono : ''}</div>
-    <div style="font-size:13px;color:#64748b;margin-top:4px">${c.diagnostico || 'Sin diagnóstico'}</div>
+    <div style="font-size:13px;color:#64748b;margin-top:4px">${c.diagnostico === 'Otro' ? (c.diagnosticoLibre || 'Otro') : (c.diagnostico || 'Sin diagnóstico')}</div>
     <div style="font-size:11px;color:#334155;margin-top:3px">${fecha} · ${c.evolucion || ''}</div>
   </div>`;
 }
@@ -395,12 +395,14 @@ function caseRowHTML(c) {
 function doSearch() {
   const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
   if (!q) { renderList(cases); return; }
-  const filtered = cases.filter(c =>
-    (c.nombre || '').toLowerCase().includes(q) ||
-    (c.diagnostico || '').toLowerCase().includes(q) ||
-    (c.telefono || '').includes(q) ||
-    (c.expediente || '').includes(q)
-  );
+  const filtered = cases.filter(c => {
+    const dx = c.diagnostico === 'Otro' ? (c.diagnosticoLibre || '') : (c.diagnostico || '');
+    return (c.nombre || '').toLowerCase().includes(q) ||
+      dx.toLowerCase().includes(q) ||
+      (c.diagnostico || '').toLowerCase().includes(q) ||
+      (c.telefono || '').includes(q) ||
+      (c.expediente || '').includes(q);
+  });
   renderList(filtered, q);
 }
 
